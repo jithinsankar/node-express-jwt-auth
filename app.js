@@ -2,10 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/authRoutes')
 const cookieParser = require('cookie-parser');
-const { requireAuth, checkUser } = require('./middleware/authMiddleware');
+const { requireAuth, checkUser, checkActiveUser } = require('./middleware/authMiddleware');
 require("dotenv").config();
 
-const stripe = require('stripe')(STRIPEKEY);
+const stripe = require('stripe')(process.env.STRIPEKEY);
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -18,7 +18,7 @@ app.use(cookieParser())
 app.set('view engine', 'ejs');
 
 // database connection
-const dbURI = MONGODBURI;
+const dbURI = process.env.MONGODBURI;
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex:true })
   .then((result) => {console.log('connected');app.listen(3000);})
   .catch((err) => console.log(err));
@@ -26,7 +26,7 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCr
 // routes
 app.get('*', checkUser);
 app.get('/', requireAuth,(req, res) => res.render('home'));
-app.get('/smoothies', requireAuth,(req, res) => res.render('smoothies'));
+app.get('/smoothies', [requireAuth,checkActiveUser],(req, res) => res.render('smoothies'));
 app.get('/success', requireAuth,(req, res) => res.render('success'));
 app.get('/cancel', requireAuth,(req, res) => res.render('cancel'));
 
@@ -40,7 +40,7 @@ app.post('/create-checkout-session', async (req, res) => {
     expand: ['data.product'],
   });
   const session = await stripe.checkout.sessions.create({
-    customer_email: 'a.b@gmail.com',
+    customer_email: req.body.email,
     billing_address_collection: 'auto',
     line_items: [
       {
@@ -143,3 +143,16 @@ app.post(
   }
 );
 
+app.get('/check',async (req,res)=>{
+
+  const customers = await stripe.customers.list({
+    email: req.body.email,
+  });
+
+  const customer_id = customers.data[0].id
+
+  const subscriptions = await stripe.subscriptions.list({
+    customer: customer_id,
+  });
+  res.send(subscriptions.data[0].status);
+})
