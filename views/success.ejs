@@ -1,14 +1,16 @@
 <%- include('partials/header'); -%>
-
-<header>
-  <div class="smoothie">
-    <img src="/smoothie.png" alt="">
-  </div>
-  <div class="headings">
-    <h2>Smoothie Recipes</h2>
-    <h3>By Ninjas For Ninjas</h3>
-    
-    <div class="product">
+<script defer>  
+document.addEventListener('DOMContentLoaded', async () => {
+  let searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has('session_id')) {
+    const session_id = searchParams.get('session_id');
+    document.getElementById('session-id').setAttribute('value', session_id);
+  }
+});
+</script>
+<h1>SUCCESS</h1>
+<section>
+    <div class="product Box-root">
       <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="14px" height="16px" viewBox="0 0 14 16" version="1.1">
           <defs/>
           <g id="Flow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -17,21 +19,15 @@
               </g>
           </g>
       </svg>
-      <div class="description">
-        <h3>Starter plan</h3>
-        <h5>$20.00 / month</h5>
+      <div class="description Box-root">
+        <h3>Subscription to Starter plan successful!</h3>
       </div>
     </div>
-    <form action="/create-checkout-session" method="POST">
-      <!-- Add a hidden field with the lookup_key of your Price -->
-      <input type="hidden" name="lookup_key" value="hi" />
-      <button id="checkout-and-portal-button" type="submit">Checkout</button>
+    <form action="/create-portal-session" method="POST">
+      <input type="hidden" id="session-id" name="session_id" value="" />
+      <button id="checkout-and-portal-button" type="submit">Manage your billing information</button>
     </form>
-
-
-    <a href="/smoothies" class="btn">View Recipes</a>
-  </div>
-</header>
+  </section>
 
 
 <%- include('partials/footer'); -%>
