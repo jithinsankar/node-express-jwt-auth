@@ -13,7 +13,6 @@ const requireAuth = (req, res, next) => {
         console.log(err.message);
         res.redirect('/login');
       } else {
-        console.log(decodedToken);
         next();
       }
     });
@@ -42,11 +41,12 @@ const checkUser = (req, res, next) => {
     }
   };
 
+//stripe middleware
 const checkActiveUser = async (req, res, next) =>{
   const customers = await stripe.customers.list({
     email: res.locals.user.email,
   });
-  console.log(customers,res.locals.user.email)
+
 
  try{ const customer_id = customers.data[0].id
 
@@ -69,4 +69,4 @@ const checkActiveUser = async (req, res, next) =>{
 }
   
   
-  module.exports = { requireAuth, checkUser, checkActiveUser };
+module.exports = { requireAuth, checkUser, checkActiveUser };

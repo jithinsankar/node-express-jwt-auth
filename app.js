@@ -68,13 +68,48 @@ app.post('/create-portal-session', async (req, res) => {
   // managing their billing with the portal.
   const returnUrl = YOUR_DOMAIN;
 
+ 
+
   const portalSession = await stripe.billingPortal.sessions.create({
     customer: checkoutSession.customer,
     return_url: returnUrl,
   });
 
   res.redirect(303, portalSession.url);
+
+
+
+
+
 });
+
+app.get('/create-portal-session', async (req, res) => {
+  
+  try 
+  { const customers = await stripe.customers.list({
+      email: res.locals.user.email,
+    });
+    console.log(customers)
+    const customer_id = customers.data[0].id
+    const returnUrl = YOUR_DOMAIN;
+
+  
+
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer:customer_id ,
+      return_url: returnUrl,
+    });
+
+    res.redirect(303, portalSession.url);
+  }
+  catch{
+    res.redirect('/signup');
+  }
+
+});
+
+
+
 
 app.post(
   '/webhook',
